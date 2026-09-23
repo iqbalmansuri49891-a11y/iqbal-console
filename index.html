@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- QRCode.js for robust native QR code generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -125,7 +123,7 @@
                 </button>
             </div>
 
-            <!-- SUB-SECTION: PUBLISH APP WITH SECRET PASSWORD -->
+            <!-- SUB-SECTION: PUBLISH APP WITH HIDDEN PASSWORD -->
             <div id="sub-publish" class="bg-cardBg border border-borderCol rounded-2xl p-6 shadow-xl">
                 <h3 class="font-bold text-white text-base mb-4 flex items-center">
                     <i class="fa-solid fa-circle-plus text-primary mr-2"></i> Submit App to Iqbal App Console
@@ -185,11 +183,10 @@
                         <textarea id="app-desc" rows="3" required class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary" placeholder="Describe your app features..."></textarea>
                     </div>
 
-                    <!-- Secret Admin Password Field -->
+                    <!-- Secret Admin Password Field (Clean without showing password on screen) -->
                     <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl space-y-1">
                         <label class="block text-xs font-bold text-red-400 mb-1"><i class="fa-solid fa-lock mr-1"></i> Admin Publishing Password (Required)</label>
                         <input type="password" id="admin-secret-pass" required class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-red-500" placeholder="Enter secret publishing password">
-                        <p class="text-[10px] text-slate-400">Default secure admin password is: <code class="text-primary font-mono font-bold">iqbal786</code> (you can change it anytime in code)</p>
                     </div>
 
                     <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-semibold py-2.5 rounded-xl shadow-lg transition-all text-sm">
@@ -217,14 +214,14 @@
                     <i class="fa-solid fa-circle-info text-primary mr-2"></i> Iqbal App Console Architecture
                 </h3>
                 <p class="text-sm text-slate-300 leading-relaxed">
-                    This platform serves as a decentralized, self-hosted App Store and Developer Console with robust security. Protected by secret admin publishing credentials and integrated native QR code UPI checkout.
+                    This platform serves as a decentralized, self-hosted App Store and Developer Console with secure admin credentials and integrated Google Pay QR code checkout.
                 </p>
             </div>
         </section>
 
     </main>
 
-    <!-- Modal for UPI Checkout / Native QR Code Generation -->
+    <!-- Modal for UPI Checkout with Original Google Pay QR Code -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="bg-cardBg border border-borderCol rounded-2xl p-6 max-w-sm w-full space-y-4 text-center shadow-2xl relative">
             <button onclick="closeCheckout()" class="absolute top-3 right-3 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -234,9 +231,9 @@
             <h3 class="font-bold text-white text-lg" id="modal-app-name">App Purchase</h3>
             <p class="text-xs text-slate-300" id="modal-app-pricing">Amount: ₹200</p>
             
-            <!-- Native QR Code Container (Fallback + Guaranteed Render) -->
-            <div class="bg-white p-3 rounded-xl inline-block mx-auto shadow-inner flex justify-center items-center">
-                <div id="native-qrcode-container" class="w-40 h-40 flex items-center justify-center"></div>
+            <!-- Original Google Pay QR Code Display -->
+            <div class="bg-white p-3 rounded-xl inline-block mx-auto shadow-inner">
+                <img src="GooglePay_QR (1).png" alt="Google Pay QR Code" class="w-44 h-44 object-contain mx-auto rounded-lg">
             </div>
 
             <div class="bg-darkBg p-3 rounded-xl border border-borderCol text-left space-y-1">
@@ -259,7 +256,7 @@
         let authMode = 'signin';
         let currentUser = localStorage.getItem('iqbal_current_user') || null;
         let apps = JSON.parse(localStorage.getItem('iqbal_apps') || '[]');
-        const MASTER_PUBLISH_PASSWORD = 'iqbal786'; // Your secret admin password
+        const MASTER_PUBLISH_PASSWORD = 'iqbal786'; // Secret password hidden from public view
 
         // Initialize App on Load
         window.addEventListener('DOMContentLoaded', () => {
@@ -374,7 +371,7 @@
             }
         }
 
-        // Secure App Publish with Secret Password Verification
+        // Secure App Publish with Hidden Password Verification
         function publishApp(e) {
             e.preventDefault();
             const secretInput = document.getElementById('admin-secret-pass').value;
@@ -451,7 +448,7 @@
             `).join('');
         }
 
-        // Checkout Modal & Native QR Code Generation
+        // Checkout Modal & Original QR Code Handler
         function openCheckout(appName, price, upiId, apkUrl) {
             document.getElementById('modal-app-name').innerText = appName;
             document.getElementById('modal-app-pricing').innerText = `Amount: ₹${price}`;
@@ -459,18 +456,6 @@
             
             const upiString = `upi://pay?pa=${upiId}&pn=Iqbal%20Electric%20Plumber&am=${price}&cu=INR`;
             document.getElementById('upi-pay-link').href = upiString;
-
-            // Generate clean native QR code inside container
-            const qrContainer = document.getElementById('native-qrcode-container');
-            qrContainer.innerHTML = '';
-            new QRCode(qrContainer, {
-                text: upiString,
-                width: 150,
-                height: 150,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
 
             window.currentDownloadApk = apkUrl;
             document.getElementById('checkout-modal').classList.remove('hidden');
