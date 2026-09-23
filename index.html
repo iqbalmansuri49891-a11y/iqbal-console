@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iqbal Developer Console & App Store</title>
+    <title>Iqbal App Console & App Store</title>
     <!-- Tailwind CSS for Modern Professional UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -13,7 +13,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1a73e8',
+                        primary: '#1e73e8',
                         darkBg: '#0f172a',
                         cardBg: '#1e293b',
                         borderCol: '#334155'
@@ -22,6 +22,7 @@
             }
         }
     </script>
+    <!-- Permanent CSS override to hide any hosting badges/watermarks -->
     <style>
         iframe#__netlify-badge, div[id*="netlify-badge"], a[href*="netlify.com/support"] {
             display: none !important;
@@ -42,11 +43,11 @@
                 <i class="fa-solid fa-store"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight tracking-wide text-white">Iqbal Console</h1>
+                <h1 class="font-bold text-lg leading-tight tracking-wide text-white">Iqbal App Console</h1>
                 <span class="text-xs text-slate-400">App Publish & Developer Hub</span>
             </div>
         </div>
-        
+
         <!-- Navigation Tabs -->
         <nav class="flex space-x-1 bg-darkBg p-1 rounded-xl border border-borderCol text-xs">
             <button onclick="switchTab('login')" id="nav-login" class="px-3 py-1.5 rounded-lg font-medium transition-all bg-primary text-white shadow">
@@ -73,165 +74,204 @@
                 </div>
 
                 <!-- Form Mode Toggle -->
-                <div class="flex bg-darkBg p-1 rounded-xl mb-6 border border-borderCol text-xs">
-                    <button onclick="setAuthMode('signin')" id="mode-signin" class="flex-1 py-2 rounded-lg font-semibold bg-primary text-white transition-all">Sign In</button>
-                    <button onclick="setAuthMode('signup')" id="mode-signup" class="flex-1 py-2 rounded-lg font-semibold text-slate-400 transition-all">Create Account</button>
+                <div class="flex bg-darkBg p-1 rounded-xl mb-6 border border-borderCol text-sm">
+                    <button onclick="setAuthMode('signin')" id="mode-signin" class="flex-1 py-2 rounded-lg font-medium transition-all bg-primary text-white shadow">Sign In</button>
+                    <button onclick="setAuthMode('signup')" id="mode-signup" class="flex-1 py-2 rounded-lg font-medium transition-all text-slate-400 hover:text-white">Register</button>
                 </div>
 
                 <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
-                    <div id="name-field" class="hidden">
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Developer / Publisher Name</label>
-                        <input type="text" id="reg-name" placeholder="e.g. John Doe" class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
-                    </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
-                        <input type="email" id="reg-email" required placeholder="developer@gmail.com" class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Username or Email</label>
+                        <input type="text" id="auth-user" required class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary" placeholder="Enter username">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-300 mb-1">Password</label>
-                        <input type="password" id="reg-pass" required placeholder="••••••••" class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary">
+                        <input type="password" id="auth-pass" required class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary" placeholder="••••••••">
                     </div>
-                    <button type="submit" id="auth-btn" class="w-full bg-primary hover:bg-blue-600 text-white font-semibold py-3 rounded-xl shadow-lg transition-all text-sm">
+                    <button type="submit" id="auth-submit-btn" class="w-full bg-primary hover:bg-blue-600 text-white font-semibold py-2.5 rounded-xl shadow-lg transition-all text-sm">
                         Sign In to Console
                     </button>
                 </form>
-
-                <div class="mt-6 text-center">
-                    <button onclick="quickDemoLogin()" class="text-xs text-primary hover:underline font-medium">
-                        <i class="fa-solid fa-bolt mr-1"></i> Quick Demo Access
-                    </button>
-                </div>
             </div>
         </section>
 
-        <!-- TAB 2: DEVELOPER CONSOLE (MANAGE & UPLOAD APPS) -->
-        <section id="tab-console" class="hidden space-y-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-cardBg border border-borderCol p-5 rounded-2xl gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-white">Publisher Dashboard</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Welcome back, <span id="user-display-name" class="text-primary font-semibold">Developer</span></p>
+        <!-- TAB 2: CONSOLE & APP STORE VIEW -->
+        <section id="tab-console" class="space-y-6 hidden">
+            <!-- User Welcome Banner -->
+            <div class="bg-cardBg border border-borderCol rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-500/20 text-primary flex items-center justify-center font-bold text-lg">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Logged in as:</p>
+                        <h3 class="font-bold text-white text-sm" id="current-username">Developer</h3>
+                    </div>
                 </div>
-                <button onclick="openUploadModal()" class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md flex items-center space-x-2 transition-all">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <span>Upload New App</span>
+                <button onclick="handleLogout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-xl text-xs font-medium transition-all">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Sign Out
                 </button>
             </div>
 
-            <!-- Apps Statistics & List -->
-            <div class="bg-cardBg border border-borderCol rounded-2xl p-5 shadow-xl">
-                <h3 class="font-bold text-base mb-4 text-white flex items-center">
-                    <i class="fa-solid fa-list-check mr-2 text-primary"></i> Your Published Applications
+            <!-- Action Tabs (Publish vs Store) -->
+            <div class="flex border-b border-borderCol pb-2 space-x-4">
+                <button onclick="switchConsoleTab('publish')" id="c-tab-publish" class="text-sm font-bold text-primary border-b-2 border-primary pb-1 transition-all">
+                    <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Publish New App
+                </button>
+                <button onclick="switchConsoleTab('store')" id="c-tab-store" class="text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all">
+                    <i class="fa-solid fa-globe mr-1"></i> Public App Store (<span id="app-count">0</span>)
+                </button>
+            </div>
+
+            <!-- SUB-SECTION: PUBLISH APP -->
+            <div id="sub-publish" class="bg-cardBg border border-borderCol rounded-2xl p-6 shadow-xl">
+                <h3 class="font-bold text-white text-base mb-4 flex items-center">
+                    <i class="fa-solid fa-circle-plus text-primary mr-2"></i> Submit App to Iqbal App Console
                 </h3>
-                
-                <div id="apps-list-container" class="space-y-3">
-                    <!-- Dynamic Apps rendered via JS -->
+                <form onsubmit="publishApp(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">App Name</label>
+                            <input type="text" id="app-name" required class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary" placeholder="e.g. Iqbal Electric Plumber">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Package Name</label>
+                            <input type="text" id="app-pkg" required class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary" placeholder="com.iqbal.electric">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Version</label>
+                            <input type="text" id="app-version" value="1.0.0" required class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Pricing Model</label>
+                            <select id="app-pricing" onchange="togglePricingFields()" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary">
+                                <option value="free" selected>Free (Default)</option>
+                                <option value="paid">Paid (Custom Pricing & UPI)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Paid Tier Options -->
+                    <div id="paid-options" class="hidden p-4 bg-darkBg/60 border border-borderCol rounded-xl space-y-3">
+                        <h4 class="text-xs font-bold text-primary uppercase tracking-wider">Monetization & UPI Checkout Config</h4>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Price (INR ₹)</label>
+                            <input type="number" id="app-price" value="200" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary" placeholder="200">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Developer UPI ID (Google Pay / PhonePe)</label>
+                            <input type="text" id="app-upi" value="iqbalelectricplumber-1@okicici" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">App Icon URL or Image Link</label>
+                            <input type="text" id="app-icon" placeholder="https://... or emoji/icon class" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">APK / Download Link</label>
+                            <input type="text" id="app-apk" required placeholder="https://example.com/app.apk" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">App Description</label>
+                        <textarea id="app-desc" rows="3" required class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary" placeholder="Describe your app features..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-semibold py-2.5 rounded-xl shadow-lg transition-all text-sm">
+                        Publish App Live
+                    </button>
+                </form>
+            </div>
+
+            <!-- SUB-SECTION: PUBLIC STORE -->
+            <div id="sub-store" class="space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-white text-base">Explore Published Apps</h3>
+                    <input type="text" id="store-search" oninput="renderStoreApps()" placeholder="Search apps..." class="bg-cardBg border border-borderCol rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-primary w-48">
+                </div>
+                <div id="apps-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Dynamic App Cards -->
                 </div>
             </div>
         </section>
 
-        <!-- TAB 3: APP DETAILS & DOWNLOAD VIEW -->
-        <section id="tab-details" class="hidden space-y-6">
-            <div class="bg-cardBg border border-borderCol rounded-2xl p-6 shadow-xl max-w-2xl mx-auto space-y-6">
-                <div class="flex justify-between items-center border-b border-borderCol pb-4">
-                    <h2 class="text-xl font-bold text-white flex items-center">
-                        <i class="fa-solid fa-circle-info mr-2 text-primary"></i> Application Details
-                    </h2>
-                    <button onclick="switchTab('console')" class="text-xs text-slate-400 hover:text-white font-medium">
-                        <i class="fa-solid fa-arrow-left mr-1"></i> Back to Console
-                    </button>
-                </div>
-
-                <div id="app-detail-content" class="space-y-4">
-                    <!-- Populated dynamically -->
+        <!-- TAB 3: DETAILS & PLATFORM INFO -->
+        <section id="tab-details" class="space-y-6 hidden">
+            <div class="bg-cardBg border border-borderCol rounded-2xl p-6 shadow-xl space-y-4">
+                <h3 class="font-bold text-white text-lg flex items-center">
+                    <i class="fa-solid fa-circle-info text-primary mr-2"></i> Iqbal App Console Architecture
+                </h3>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    This platform serves as a decentralized, self-hosted App Store and Developer Console. Built with a robust Single-File architecture utilizing Tailwind CSS, LocalStorage state management, and direct static deployment via GitHub Pages.
+                </p>
+                <div class="border-t border-borderCol pt-4 space-y-2">
+                    <h4 class="font-bold text-white text-sm">Features & Capabilities:</h4>
+                    <ul class="list-disc list-inside text-xs text-slate-300 space-y-1">
+                        <li>Multi-user account creation and secure session management.</li>
+                        <li>Configurable App publishing with custom icons, APK links, and versioning.</li>
+                        <li>Flexible monetization models supporting Free apps and custom Paid tiers.</li>
+                        <li>Integrated Google Pay / UPI checkout (`iqbalelectricplumber-1@okicici`) with automated QR code generation for paid app purchases.</li>
+                    </ul>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- UPLOAD APP MODAL -->
-    <div id="upload-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-cardBg border border-borderCol rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-borderCol pb-3">
-                <h3 class="font-bold text-lg text-white">Publish New App</h3>
-                <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+    <!-- Modal for UPI Checkout / QR Code -->
+    <div id="checkout-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-cardBg border border-borderCol rounded-2xl p-6 max-w-sm w-full space-y-4 text-center shadow-2xl relative">
+            <button onclick="closeCheckout()" class="absolute top-3 right-3 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
             </div>
-            <form onsubmit="handleAppUpload(event)" class="space-y-4 text-sm">
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">App Name</label>
-                    <input type="text" id="app-name-input" required placeholder="e.g. My Awesome App" class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Package Name (Bundle ID)</label>
-                    <input type="text" id="app-pkg-input" required placeholder="com.developer.appname" class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">App Icon Image URL</label>
-                    <input type="url" id="app-icon-input" placeholder="https://example.com/icon.png" class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Pricing Type</label>
-                        <select id="app-price-type" onchange="togglePriceInput()" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-white focus:outline-none focus:border-primary">
-                            <option value="Free" selected>Free</option>
-                            <option value="Paid">Paid</option>
-                        </select>
-                    </div>
-                    <div id="price-amount-box" class="hidden">
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Price (₹)</label>
-                        <input type="text" id="app-price-input" placeholder="e.g. ₹200" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-white focus:outline-none focus:border-primary">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Google Pay UPI ID (For Payments)</label>
-                    <input type="text" id="app-upi-input" value="iqbalelectricplumber-1@okicici" placeholder="iqbalelectricplumber-1@okicici" class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">App Description & Features</label>
-                    <textarea id="app-desc-input" rows="3" placeholder="Write details about your app..." class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">APK File Link / Direct URL</label>
-                    <input type="url" id="app-apk-input" required placeholder="https://example.com/app.apk" class="w-full bg-darkBg border border-borderCol rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary">
-                </div>
-                <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeUploadModal()" class="px-4 py-2 rounded-xl bg-darkBg border border-borderCol text-slate-300 font-medium hover:bg-slate-800">Cancel</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-primary hover:bg-blue-600 text-white font-semibold shadow">Publish App</button>
-                </div>
-            </form>
+            <h3 class="font-bold text-white text-lg" id="modal-app-name">App Purchase</h3>
+            <p class="text-xs text-slate-300" id="modal-app-pricing">Amount: ₹200</p>
+            
+            <!-- Dynamic QR Code Container -->
+            <div class="bg-white p-3 rounded-xl inline-block mx-auto shadow-inner">
+                <img id="upi-qrcode" src="" alt="UPI QR Code" class="w-40 h-40 object-contain mx-auto">
+            </div>
+
+            <div class="bg-darkBg p-3 rounded-xl border border-borderCol text-left space-y-1">
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider">UPI ID:</p>
+                <p class="text-xs font-mono text-primary font-bold" id="modal-upi-id">iqbalelectricplumber-1@okicici</p>
+            </div>
+
+            <a id="upi-pay-link" href="#" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl shadow-lg transition-all text-sm text-center">
+                Pay via GPay / UPI App
+            </a>
+            <button onclick="confirmPaymentSuccess()" class="w-full bg-primary hover:bg-blue-600 text-white font-semibold py-2 rounded-xl text-xs transition-all">
+                I Have Paid – Download APK
+            </button>
         </div>
     </div>
 
     <!-- JavaScript Application Logic -->
     <script>
+        // State Management
         let authMode = 'signin';
-        let currentUser = JSON.parse(localStorage.getItem('iqbal_current_user')) || null;
-        let appsDb = JSON.parse(localStorage.getItem('iqbal_apps_db')) || [
-            { 
-                id: 1, 
-                name: 'Iqbal Electric Plumber', 
-                package: 'com.iqbal.electricplumber', 
-                icon: 'https://cdn-icons-png.flaticon.com/512/1995/1995575.png', 
-                priceType: 'Paid', 
-                price: '₹200', 
-                upi: 'iqbalelectricplumber-1@okicici',
-                desc: 'Professional plumbing and electrical service application.', 
-                apk: '#', 
-                developer: 'Iqbal Mansuri', 
-                verified: true 
-            }
-        ];
+        let currentUser = localStorage.getItem('iqbal_current_user') || null;
+        let apps = JSON.parse(localStorage.getItem('iqbal_apps') || '[]');
 
-        function initApp() {
+        // Initialize App on Load
+        window.addEventListener('DOMContentLoaded', () => {
             if (currentUser) {
-                document.getElementById('user-display-name').innerText = currentUser.name;
                 switchTab('console');
+                document.getElementById('current-username').innerText = currentUser;
             } else {
                 switchTab('login');
             }
-            renderAppsList();
-        }
+            renderStoreApps();
+        });
 
+        // Tab Switching
         function switchTab(tabId) {
             ['login', 'console', 'details'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
@@ -245,179 +285,192 @@
             if(activeNav) {
                 activeNav.className = "px-3 py-1.5 rounded-lg font-medium transition-all bg-primary text-white shadow";
             }
-            if(tabId === 'console' && !currentUser) {
-                switchTab('login');
+        }
+
+        // Auth Mode Toggle
+        function switchConsoleTab(sub) {
+            if(sub === 'publish') {
+                document.getElementById('sub-publish').classList.remove('hidden');
+                document.getElementById('sub-store').classList.add('hidden');
+                document.getElementById('c-tab-publish').className = "text-sm font-bold text-primary border-b-2 border-primary pb-1 transition-all";
+                document.getElementById('c-tab-store').className = "text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all";
+            } else {
+                document.getElementById('sub-publish').classList.add('hidden');
+                document.getElementById('sub-store').classList.remove('hidden');
+                document.getElementById('c-tab-store').className = "text-sm font-bold text-primary border-b-2 border-primary pb-1 transition-all";
+                document.getElementById('c-tab-publish').className = "text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all";
+                renderStoreApps();
             }
         }
 
         function setAuthMode(mode) {
             authMode = mode;
-            const nameField = document.getElementById('name-field');
-            const authTitle = document.getElementById('auth-title');
-            const authSubtitle = document.getElementById('auth-subtitle');
-            const authBtn = document.getElementById('auth-btn');
+            const signinBtn = document.getElementById('mode-signin');
+            const signupBtn = document.getElementById('mode-signup');
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const submitBtn = document.getElementById('auth-submit-btn');
 
-            if(mode === 'signup') {
-                nameField.classList.remove('hidden');
-                authTitle.innerText = "Create Developer Account";
-                authSubtitle.innerText = "Register to publish your own apps publicly";
-                authBtn.innerText = "Register Account";
-                document.getElementById('mode-signup').className = "flex-1 py-2 rounded-lg font-semibold bg-primary text-white transition-all";
-                document.getElementById('mode-signin').className = "flex-1 py-2 rounded-lg font-semibold text-slate-400 transition-all";
+            if(mode === 'signin') {
+                signinBtn.className = "flex-1 py-2 rounded-lg font-medium transition-all bg-primary text-white shadow";
+                signupBtn.className = "flex-1 py-2 rounded-lg font-medium transition-all text-slate-400 hover:text-white";
+                title.innerText = "Developer Sign In";
+                subtitle.innerText = "Access your public publishing dashboard";
+                submitBtn.innerText = "Sign In to Console";
             } else {
-                nameField.classList.add('hidden');
-                authTitle.innerText = "Developer Sign In";
-                authSubtitle.innerText = "Access your public publishing dashboard";
-                authBtn.innerText = "Sign In to Console";
-                document.getElementById('mode-signin').className = "flex-1 py-2 rounded-lg font-semibold bg-primary text-white transition-all";
-                document.getElementById('mode-signup').className = "flex-1 py-2 rounded-lg font-semibold text-slate-400 transition-all";
+                signupBtn.className = "flex-1 py-2 rounded-lg font-medium transition-all bg-primary text-white shadow";
+                signinBtn.className = "flex-1 py-2 rounded-lg font-medium transition-all text-slate-400 hover:text-white";
+                title.innerText = "Create Developer Account";
+                subtitle.innerText = "Register to publish apps on Iqbal Console";
+                submitBtn.innerText = "Register & Sign In";
             }
         }
 
+        // Handle Authentication
         function handleAuth(e) {
             e.preventDefault();
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const name = document.getElementById('reg-name').value || email.split('@')[0];
+            const user = document.getElementById('auth-user').value.trim();
+            const pass = document.getElementById('auth-pass').value;
+            
+            if(!user || !pass) return alert("Please fill all fields");
 
-            currentUser = { name, email };
-            localStorage.setItem('iqbal_current_user', JSON.stringify(currentUser));
-            document.getElementById('user-display-name').innerText = currentUser.name;
-            switchTab('console');
-            renderAppsList();
-        }
+            let users = JSON.parse(localStorage.getItem('iqbal_users') || '{}');
 
-            function quickDemoLogin() {
-            currentUser = { name: 'Iqbal Mansuri', email: 'iqbal@developer.com' };
-            localStorage.setItem('iqbal_current_user', JSON.stringify(currentUser));
-            document.getElementById('user-display-name').innerText = currentUser.name;
-            switchTab('console');
-            renderAppsList();
-        }
-
-        function togglePriceInput() {
-            const type = document.getElementById('app-price-type').value;
-            const box = document.getElementById('price-amount-box');
-            if(type === 'Paid') {
-                box.classList.remove('hidden');
+            if(authMode === 'signup') {
+                if(users[user]) {
+                    alert("Username already exists! Please sign in.");
+                    return;
+                }
+                users[user] = pass;
+                localStorage.setItem('iqbal_users', JSON.stringify(users));
+                alert("Account created successfully!");
             } else {
-                box.classList.add('hidden');
+                if(!users[user] || users[user] !== pass) {
+                    alert("Invalid username or password!");
+                    return;
+                }
+            }
+
+            currentUser = user;
+            localStorage.setItem('iqbal_current_user', currentUser);
+            document.getElementById('current-username').innerText = currentUser;
+            document.getElementById('auth-form').reset();
+            switchTab('console');
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('iqbal_current_user');
+            switchTab('login');
+        }
+
+        // Pricing Tier Fields Toggle
+        function togglePricingFields() {
+            const pricing = document.getElementById('app-pricing').value;
+            const paidDiv = document.getElementById('paid-options');
+            if(pricing === 'paid') {
+                paidDiv.classList.remove('hidden');
+            } else {
+                paidDiv.classList.add('hidden');
             }
         }
 
-        function renderAppsList() {
-            const container = document.getElementById('apps-list-container');
-            if(appsDb.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No apps published yet. Click 'Upload New App' to get started.</p>`;
+        // Publish App Function
+        function publishApp(e) {
+            e.preventDefault();
+            const name = document.getElementById('app-name').value;
+            const pkg = document.getElementById('app-pkg').value;
+            const version = document.getElementById('app-version').value;
+            const pricing = document.getElementById('app-pricing').value;
+            const price = pricing === 'paid' ? document.getElementById('app-price').value : '0';
+            const upi = pricing === 'paid' ? document.getElementById('app-upi').value : 'iqbalelectricplumber-1@okicici';
+            const icon = document.getElementById('app-icon').value || 'fa-solid fa-cube';
+            const apk = document.getElementById('app-apk').value;
+            const desc = document.getElementById('app-desc').value;
+
+            const newApp = {
+                id: Date.now(),
+                name, pkg, version, pricing, price, upi, icon, apk, desc,
+                developer: currentUser,
+                date: new Date().toLocaleDateString()
+            };
+
+            apps.push(newApp);
+            localStorage.setItem('iqbal_apps', JSON.stringify(apps));
+            alert("App published successfully to Iqbal App Console!");
+            e.target.reset();
+            togglePricingFields();
+            switchConsoleTab('store');
+        }
+
+        // Render Store Apps
+        function renderStoreApps() {
+            const grid = document.getElementById('apps-grid');
+            const search = document.getElementById('store-search').value.toLowerCase();
+            document.getElementById('app-count').innerText = apps.length;
+
+            const filtered = apps.filter(a => a.name.toLowerCase().includes(search) || a.pkg.toLowerCase().includes(search));
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">No apps found. Publish your first app now!</div>`;
                 return;
             }
 
-            container.innerHTML = appsDb.map(app => `
-                <div class="bg-darkBg border border-borderCol p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div class="flex items-center space-x-3">
-                        <img src="${app.icon || 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png'}" class="w-12 h-12 rounded-xl object-cover border border-borderCol bg-slate-800" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <h4 class="font-bold text-white text-sm">${app.name}</h4>
-                                <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-semibold">${app.priceType === 'Paid' ? app.price : 'Free'}</span>
+            grid.innerHTML = filtered.map(app => `
+                <div class="bg-darkBg border border-borderCol rounded-xl p-4 flex flex-col justify-between space-y-3 shadow">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-12 h-12 bg-primary/20 text-primary rounded-xl flex items-center justify-center text-xl shrink-0">
+                            ${app.icon.startsWith('http') ? `<img src="${app.icon}" class="w-full h-full object-cover rounded-xl">` : `<i class="${app.icon}"></i>`}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-white text-sm truncate">${app.name}</h4>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${app.pricing === 'paid' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
+                                    ${app.pricing === 'paid' ? '₹' + app.price : 'Free'}
+                                </span>
                             </div>
-                            <p class="text-xs text-slate-400 mt-0.5">${app.package} • By ${app.developer}</p>
+                            <p class="text-[11px] text-slate-400 truncate">${app.pkg}</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5">By ${app.developer} • v${app.version}</p>
                         </div>
                     </div>
-                    <button onclick="viewAppDetails(${app.id})" class="bg-borderCol hover:bg-slate-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-all">
-                        View Details
-                    </button>
+                    <p class="text-xs text-slate-300 line-clamp-2">${app.desc}</p>
+                    <div class="flex justify-between items-center pt-2 border-t border-borderCol">
+                        <span class="text-[10px] text-slate-500">${app.date}</span>
+                        ${app.pricing === 'paid' ? 
+                            `<button onclick="openCheckout('${app.name}', '${app.price}', '${app.upi}', '${app.apk}')" class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">Buy & Download</button>` :
+                            `<a href="${app.apk}" target="_blank" class="bg-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">Download APK</a>`
+                        }
+                    </div>
                 </div>
             `).join('');
         }
 
-        function openUploadModal() {
-            document.getElementById('upload-modal').classList.remove('hidden');
-            document.getElementById('upload-modal').classList.add('flex');
+        // Checkout Modal & UPI QR Code Generator
+        function openCheckout(appName, price, upiId, apkUrl) {
+            document.getElementById('modal-app-name').innerText = appName;
+            document.getElementById('modal-app-pricing').innerText = `Amount: ₹${price}`;
+            document.getElementById('modal-upi-id').innerText = upiId;
+            
+            // Generate UPI Intent and QR Code via public API
+            const upiString = `upi://pay?pa=${upiId}&pn=Iqbal%20Electric%20Plumber&am=${price}&cu=INR`;
+            document.getElementById('upi-pay-link').href = upiString;
+            document.getElementById('upi-qrcode').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiString)}`;
+
+            window.currentDownloadApk = apkUrl;
+            document.getElementById('checkout-modal').classList.remove('hidden');
+            document.getElementById('checkout-modal').classList.add('flex');
         }
 
-        function closeUploadModal() {
-            document.getElementById('upload-modal').classList.add('hidden');
-            document.getElementById('upload-modal').classList.remove('flex');
+        function closeCheckout() {
+            document.getElementById('checkout-modal').classList.remove('flex');
+            document.getElementById('checkout-modal').classList.add('hidden');
         }
 
-        function handleAppUpload(e) {
-            e.preventDefault();
-            const name = document.getElementById('app-name-input').value;
-            const pkg = document.getElementById('app-pkg-input').value;
-            const icon = document.getElementById('app-icon-input').value;
-            const priceType = document.getElementById('app-price-type').value;
-            const price = priceType === 'Paid' ? (document.getElementById('app-price-input').value || '₹200') : 'Free';
-            const upi = document.getElementById('app-upi-input').value || 'iqbalelectricplumber-1@okicici';
-            const desc = document.getElementById('app-desc-input').value;
-            const apk = document.getElementById('app-apk-input').value;
-
-            const newApp = {
-                id: Date.now(),
-                name,
-                package: pkg,
-                icon,
-                priceType,
-                price,
-                upi,
-                desc,
-                apk,
-                developer: currentUser ? currentUser.name : 'Public Developer',
-                verified: true
-            };
-
-            appsDb.push(newApp);
-            localStorage.setItem('iqbal_apps_db', JSON.stringify(appsDb));
-            closeUploadModal();
-            renderAppsList();
-            alert('App uploaded and published successfully!');
+        function confirmPaymentSuccess() {
+            alert("Payment verified! Starting your APK download.");
+            window.open(window.currentDownloadApk, '_blank');
+            closeCheckout();
         }
-
-        function viewAppDetails(id) {
-            const app = appsDb.find(a => a.id === id);
-            if(!app) return;
-
-            const container = document.getElementById('app-detail-content');
-            container.innerHTML = `
-                <div class="space-y-4 text-sm">
-                    <div class="flex items-center space-x-4 border-b border-borderCol pb-4">
-                        <img src="${app.icon || 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png'}" class="w-16 h-16 rounded-2xl object-cover border border-borderCol bg-slate-800" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
-                        <div>
-                            <h3 class="font-bold text-lg text-white">${app.name}</h3>
-                            <p class="text-xs text-slate-400">Publisher: <span class="text-primary font-medium">${app.developer}</span></p>
-                            <span class="inline-block mt-1 bg-primary/20 text-blue-400 text-xs px-2.5 py-0.5 rounded-full font-semibold">Price: ${app.priceType === 'Paid' ? app.price : 'Free'}</span>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="text-xs text-slate-400">Package Name</span>
-                        <p class="font-mono text-xs bg-darkBg p-2 rounded-lg border border-borderCol text-slate-300 mt-1">${app.package}</p>
-                    </div>
-                    <div>
-                        <span class="text-xs text-slate-400">Description</span>
-                        <p class="text-slate-300 text-xs mt-1 bg-darkBg p-3 rounded-xl border border-borderCol">${app.desc || 'No description provided.'}</p>
-                    </div>
-
-                    ${app.priceType === 'Paid' ? `
-                    <div class="bg-darkBg border border-borderCol p-4 rounded-xl text-center space-y-3">
-                        <h4 class="font-bold text-white text-sm"><i class="fa-solid fa-qrcode mr-1 text-primary"></i> Scan & Pay (${app.price})</h4>
-                        <p class="text-xs text-slate-400">Scan this Google Pay QR code or pay to UPI ID: <b class="text-white">${app.upi || 'iqbalelectricplumber-1@okicici'}</b></p>
-                        <div class="flex justify-center">
-                            <img src="https://i.ibb.co/6R21W0W/GooglePay-QR.png" alt="Google Pay QR" class="w-48 h-48 bg-white p-2 rounded-xl border border-borderCol object-contain" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${app.upi || 'iqbalelectricplumber-1@okicici'}&pn=Iqbal%20Developer'">
-                        </div>
-                    </div>
-                    ` : ''}
-
-                    <div class="pt-2">
-                        <a href="${app.apk}" target="_blank" class="block w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl shadow-lg transition-all text-sm">
-                            <i class="fa-solid fa-download mr-2"></i> Download APK File (${app.priceType === 'Paid' ? app.price : 'Free'})
-                        </a>
-                    </div>
-                </div>
-            `;
-            switchTab('details');
-        }
-
-        window.onload = initApp;
     </script>
 </body>
 </html>
