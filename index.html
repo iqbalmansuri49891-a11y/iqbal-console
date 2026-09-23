@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode.js for robust native QR code generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -97,7 +99,7 @@
 
         <!-- TAB 2: CONSOLE & APP STORE VIEW -->
         <section id="tab-console" class="space-y-6 hidden">
-            <!-- User Welcome Banner -->
+            <!-- User Welcome Banner with Gmail Support Connect -->
             <div class="bg-cardBg border border-borderCol rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 rounded-full bg-blue-500/20 text-primary flex items-center justify-center font-bold text-lg">
@@ -108,25 +110,34 @@
                         <h3 class="font-bold text-white text-sm" id="current-username">Developer</h3>
                     </div>
                 </div>
-                <button onclick="handleLogout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-xl text-xs font-medium transition-all">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Sign Out
-                </button>
+                <div class="flex items-center space-x-2">
+                    <!-- Connect via Gmail Support Button -->
+                    <a href="mailto:iqbalmansuri49891@gmail.com?subject=Support%20Regarding%20Pending%20App%20Publish&body=Hello%20Iqbal,%20please%20help%20me%20with%20my%20app%20publish." class="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-3 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center">
+                        <i class="fa-solid fa-envelope mr-1.5"></i> Contact Admin
+                    </a>
+                    <button onclick="handleLogout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-xl text-xs font-medium transition-all">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Sign Out
+                    </button>
+                </div>
             </div>
 
-            <!-- Action Tabs (Publish vs Store) -->
-            <div class="flex border-b border-borderCol pb-2 space-x-4">
-                <button onclick="switchConsoleTab('publish')" id="c-tab-publish" class="text-sm font-bold text-primary border-b-2 border-primary pb-1 transition-all">
+            <!-- Action Tabs (Publish vs Store vs Admin Approval) -->
+            <div class="flex border-b border-borderCol pb-2 space-x-4 overflow-x-auto">
+                <button onclick="switchConsoleTab('publish')" id="c-tab-publish" class="text-sm font-bold text-primary border-b-2 border-primary pb-1 transition-all shrink-0">
                     <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Publish New App
                 </button>
-                <button onclick="switchConsoleTab('store')" id="c-tab-store" class="text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all">
+                <button onclick="switchConsoleTab('store')" id="c-tab-store" class="text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all shrink-0">
                     <i class="fa-solid fa-globe mr-1"></i> Public App Store (<span id="app-count">0</span>)
+                </button>
+                <button onclick="switchConsoleTab('admin')" id="c-tab-admin" class="text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all shrink-0">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Admin Approvals (<span id="pending-count">0</span>)
                 </button>
             </div>
 
-            <!-- SUB-SECTION: PUBLISH APP WITH HIDDEN PASSWORD -->
+            <!-- SUB-SECTION: PUBLISH APP -->
             <div id="sub-publish" class="bg-cardBg border border-borderCol rounded-2xl p-6 shadow-xl">
                 <h3 class="font-bold text-white text-base mb-4 flex items-center">
-                    <i class="fa-solid fa-circle-plus text-primary mr-2"></i> Submit App to Iqbal App Console
+                    <i class="fa-solid fa-circle-plus text-primary mr-2"></i> Submit App to Iqbal App Console (Goes to Pending)
                 </h3>
                 <form onsubmit="publishApp(event)" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -148,14 +159,14 @@
                         <div>
                             <label class="block text-xs font-medium text-slate-300 mb-1">Pricing Model</label>
                             <select id="app-pricing" onchange="togglePricingFields()" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary">
-                                <option value="free" selected>Free (Default)</option>
-                                <option value="paid">Paid (Custom Pricing & UPI)</option>
+                                <option value="free">Free</option>
+                                <option value="paid" selected>Paid (Default ₹200)</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Paid Tier Options -->
-                    <div id="paid-options" class="hidden p-4 bg-darkBg/60 border border-borderCol rounded-xl space-y-3">
+                    <!-- Paid Tier Options with ₹200 Default -->
+                    <div id="paid-options" class="p-4 bg-darkBg/60 border border-borderCol rounded-xl space-y-3">
                         <h4 class="text-xs font-bold text-primary uppercase tracking-wider">Monetization & UPI Checkout Config</h4>
                         <div>
                             <label class="block text-xs font-medium text-slate-300 mb-1">Price (INR ₹)</label>
@@ -170,7 +181,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-slate-300 mb-1">App Icon URL or Image Link</label>
-                            <input type="text" id="app-icon" placeholder="https://... or emoji/icon class" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary">
+                            <input type="text" id="app-icon" placeholder="https://... or icon class" class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-300 mb-1">APK / Download Link</label>
@@ -183,14 +194,14 @@
                         <textarea id="app-desc" rows="3" required class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-primary" placeholder="Describe your app features..."></textarea>
                     </div>
 
-                    <!-- Secret Admin Password Field (Clean without showing password on screen) -->
+                    <!-- Secret Admin Password Field -->
                     <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl space-y-1">
                         <label class="block text-xs font-bold text-red-400 mb-1"><i class="fa-solid fa-lock mr-1"></i> Admin Publishing Password (Required)</label>
                         <input type="password" id="admin-secret-pass" required class="w-full bg-darkBg border border-borderCol rounded-xl px-3 py-2 text-sm text-white focus:border-red-500" placeholder="Enter secret publishing password">
                     </div>
 
                     <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-semibold py-2.5 rounded-xl shadow-lg transition-all text-sm">
-                        Publish App Live Securely
+                        Submit App for Review
                     </button>
                 </form>
             </div>
@@ -202,7 +213,18 @@
                     <input type="text" id="store-search" oninput="renderStoreApps()" placeholder="Search apps..." class="bg-cardBg border border-borderCol rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-primary w-48">
                 </div>
                 <div id="apps-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Dynamic App Cards -->
+                    <!-- Dynamic Approved App Cards -->
+                </div>
+            </div>
+
+            <!-- SUB-SECTION: ADMIN APPROVALS -->
+            <div id="sub-admin" class="space-y-4 hidden bg-cardBg border border-borderCol rounded-2xl p-6 shadow-xl">
+                <h3 class="font-bold text-white text-base flex items-center">
+                    <i class="fa-solid fa-user-gear text-amber-400 mr-2"></i> Pending Apps Review (Admin Only)
+                </h3>
+                <p class="text-xs text-slate-400">Review submitted developer apps and publish them live to the store.</p>
+                <div id="pending-apps-grid" class="space-y-3">
+                    <!-- Dynamic Pending Apps -->
                 </div>
             </div>
         </section>
@@ -214,14 +236,14 @@
                     <i class="fa-solid fa-circle-info text-primary mr-2"></i> Iqbal App Console Architecture
                 </h3>
                 <p class="text-sm text-slate-300 leading-relaxed">
-                    This platform serves as a decentralized, self-hosted App Store and Developer Console with secure admin credentials and integrated Google Pay QR code checkout.
+                    Decentralized App Store featuring secure admin review queues, ₹200 default paid monetization, and native QR code checkout.
                 </p>
             </div>
         </section>
 
     </main>
 
-    <!-- Modal for UPI Checkout with Original Google Pay QR Code -->
+    <!-- Modal for UPI Checkout with Native QR Code Generator -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="bg-cardBg border border-borderCol rounded-2xl p-6 max-w-sm w-full space-y-4 text-center shadow-2xl relative">
             <button onclick="closeCheckout()" class="absolute top-3 right-3 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -231,9 +253,9 @@
             <h3 class="font-bold text-white text-lg" id="modal-app-name">App Purchase</h3>
             <p class="text-xs text-slate-300" id="modal-app-pricing">Amount: ₹200</p>
             
-            <!-- Original Google Pay QR Code Display -->
-            <div class="bg-white p-3 rounded-xl inline-block mx-auto shadow-inner">
-                <img src="GooglePay_QR (1).png" alt="Google Pay QR Code" class="w-44 h-44 object-contain mx-auto rounded-lg">
+            <!-- Guaranteed Native QR Code Container -->
+            <div class="bg-white p-3 rounded-xl inline-block mx-auto shadow-inner flex justify-center items-center">
+                <div id="native-qrcode-container" class="w-40 h-40 flex items-center justify-center"></div>
             </div>
 
             <div class="bg-darkBg p-3 rounded-xl border border-borderCol text-left space-y-1">
@@ -256,7 +278,8 @@
         let authMode = 'signin';
         let currentUser = localStorage.getItem('iqbal_current_user') || null;
         let apps = JSON.parse(localStorage.getItem('iqbal_apps') || '[]');
-        const MASTER_PUBLISH_PASSWORD = 'iqbal786'; // Secret password hidden from public view
+        let pendingApps = JSON.parse(localStorage.getItem('iqbal_pending_apps') || '[]');
+        const MASTER_PUBLISH_PASSWORD = 'iqbal786'; // Secret admin password
 
         // Initialize App on Load
         window.addEventListener('DOMContentLoaded', () => {
@@ -267,6 +290,7 @@
                 switchTab('login');
             }
             renderStoreApps();
+            renderPendingApps();
         });
 
         // Tab Switching
@@ -286,18 +310,18 @@
         }
 
         function switchConsoleTab(sub) {
-            if(sub === 'publish') {
-                document.getElementById('sub-publish').classList.remove('hidden');
-                document.getElementById('sub-store').classList.add('hidden');
-                document.getElementById('c-tab-publish').className = "text-sm font-bold text-primary border-b-2 border-primary pb-1 transition-all";
-                document.getElementById('c-tab-store').className = "text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all";
-            } else {
-                document.getElementById('sub-publish').classList.add('hidden');
-                document.getElementById('sub-store').classList.remove('hidden');
-                document.getElementById('c-tab-store').className = "text-sm font-bold text-primary border-b-2 border-primary pb-1 transition-all";
-                document.getElementById('c-tab-publish').className = "text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all";
-                renderStoreApps();
-            }
+            ['publish', 'store', 'admin'].forEach(s => {
+                const el = document.getElementById(`sub-${s}`);
+                const btn = document.getElementById(`c-tab-${s}`);
+                if(el) el.classList.add('hidden');
+                if(btn) btn.className = "text-sm font-semibold text-slate-400 hover:text-white pb-1 transition-all shrink-0";
+            });
+
+            document.getElementById(`sub-${sub}`).classList.remove('hidden');
+            document.getElementById(`c-tab-${sub}`).className = "text-sm font-bold text-primary border-b-2 border-primary pb-1 transition-all shrink-0";
+            
+            if(sub === 'store') renderStoreApps();
+            if(sub === 'admin') renderPendingApps();
         }
 
         function setAuthMode(mode) {
@@ -323,7 +347,6 @@
             }
         }
 
-        // Handle Authentication
         function handleAuth(e) {
             e.preventDefault();
             const user = document.getElementById('auth-user').value.trim();
@@ -371,7 +394,7 @@
             }
         }
 
-        // Secure App Publish with Hidden Password Verification
+        // Submit App for Admin Review
         function publishApp(e) {
             e.preventDefault();
             const secretInput = document.getElementById('admin-secret-pass').value;
@@ -398,15 +421,15 @@
                 date: new Date().toLocaleDateString()
             };
 
-            apps.push(newApp);
-            localStorage.setItem('iqbal_apps', JSON.stringify(apps));
-            alert("✅ App published successfully to Iqbal App Console!");
+            pendingApps.push(newApp);
+            localStorage.setItem('iqbal_pending_apps', JSON.stringify(pendingApps));
+            alert("✅ App submitted successfully! It is now pending admin approval.");
             e.target.reset();
             togglePricingFields();
-            switchConsoleTab('store');
+            switchConsoleTab('admin');
         }
 
-        // Render Store Apps
+        // Render Public Store Apps
         function renderStoreApps() {
             const grid = document.getElementById('apps-grid');
             const search = document.getElementById('store-search').value.toLowerCase();
@@ -415,7 +438,7 @@
             const filtered = apps.filter(a => a.name.toLowerCase().includes(search) || a.pkg.toLowerCase().includes(search));
 
             if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">No apps found. Publish your first app now!</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">No live apps available yet. Check back soon!</div>`;
                 return;
             }
 
@@ -448,7 +471,53 @@
             `).join('');
         }
 
-        // Checkout Modal & Original QR Code Handler
+        // Render Pending Apps for Admin Approval
+        function renderPendingApps() {
+            const container = document.getElementById('pending-apps-grid');
+            document.getElementById('pending-count').innerText = pendingApps.length;
+
+            if(pendingApps.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No pending apps to review.</p>`;
+                return;
+            }
+
+            container.innerHTML = pendingApps.map((app, index) => `
+                <div class="bg-darkBg border border-borderCol rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h4 class="font-bold text-white text-sm">${app.name} <span class="text-xs text-slate-400">(${app.pkg})</span></h4>
+                        <p class="text-xs text-slate-300">Price: ${app.pricing === 'paid' ? '₹' + app.price : 'Free'} • By ${app.developer}</p>
+                        <p class="text-[10px] text-slate-500">APK: ${app.apk}</p>
+                    </div>
+                    <div class="flex space-x-2 w-full sm:w-auto">
+                        <button onclick="approveApp(${index})" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">
+                            Approve & Publish
+                        </button>
+                        <button onclick="rejectApp(${index})" class="flex-1 sm:flex-none bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">
+                            Reject
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approveApp(index) {
+            const app = pendingApps.splice(index, 1)[0];
+            apps.push(app);
+            localStorage.setItem('iqbal_pending_apps', JSON.stringify(pendingApps));
+            localStorage.setItem('iqbal_apps', JSON.stringify(apps));
+            alert(`✅ App "${app.name}" approved and published live to store!`);
+            renderPendingApps();
+            renderStoreApps();
+        }
+
+        function rejectApp(index) {
+            pendingApps.splice(index, 1);
+            localStorage.setItem('iqbal_pending_apps', JSON.stringify(pendingApps));
+            alert("❌ App rejected and removed.");
+            renderPendingApps();
+        }
+
+        // Checkout Modal & Guaranteed Native QR Code Generator
         function openCheckout(appName, price, upiId, apkUrl) {
             document.getElementById('modal-app-name').innerText = appName;
             document.getElementById('modal-app-pricing').innerText = `Amount: ₹${price}`;
@@ -456,6 +525,17 @@
             
             const upiString = `upi://pay?pa=${upiId}&pn=Iqbal%20Electric%20Plumber&am=${price}&cu=INR`;
             document.getElementById('upi-pay-link').href = upiString;
+
+            const qrContainer = document.getElementById('native-qrcode-container');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: upiString,
+                width: 150,
+                height: 150,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
 
             window.currentDownloadApk = apkUrl;
             document.getElementById('checkout-modal').classList.remove('hidden');
